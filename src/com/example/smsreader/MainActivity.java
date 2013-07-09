@@ -1,8 +1,19 @@
 package com.example.smsreader;
 
+import java.util.Calendar;
+
+import com.example.smsreader.ServiceExample;
+
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
 
@@ -19,4 +30,33 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+
+	public void ToggleService(View view) {
+
+		boolean on = ((ToggleButton) view).isChecked();
+		AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+		Intent intent = new Intent(this, ServiceExample.class);
+		// Intent intent=new Intent("com.example.smsinformer.ServiceExample");
+		PendingIntent pintent = PendingIntent.getService(this, 0, intent, 0);
+
+		if (on) {
+			// Enable vibrate
+			// startService(new Intent(this, ServiceExample.class));
+			// this.startService(intent);
+			// inetnt=new Intent(this,ServiceExample.class);
+			Log.v("SmsInformer", "Starting service");
+			// startService(inetnt);
+			Calendar cal = Calendar.getInstance();
+			// Start every 30 seconds
+			alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+					40 * 1000, pintent);
+
+		} else {
+			// inetnt=new Intent(this,ServiceExample.class);
+			Log.v("SmsInformer", "Stopping service");
+			// stopService(inetnt);
+			alarm.cancel(pintent);
+		}
+
+	}
 }
