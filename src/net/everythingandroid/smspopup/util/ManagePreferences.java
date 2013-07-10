@@ -1,16 +1,12 @@
 package net.everythingandroid.smspopup.util;
 
 
-import com.example.smsreader.BuildConfig;
-
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.preference.PreferenceManager;
 
 public class ManagePreferences {
-    private long mRowId = 0;
+    //private long mRowId = 0;
     private Context mContext;
     private Cursor mCursor;
     private boolean useDatabase;

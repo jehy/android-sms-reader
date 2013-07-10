@@ -2,14 +2,25 @@ package com.example.smsreader;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
+import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.CoreProtocolPNames;
+import org.apache.http.params.HttpParams;
 
 import net.everythingandroid.smspopup.provider.SmsMmsMessage;
 import net.everythingandroid.smspopup.util.SmsPopupUtils;
@@ -124,21 +135,32 @@ public class ServiceExample extends IntentService {
 															// oldest
 			{
 				long messageId = Messages.get(i).getMessageId();
-				Log.e("Message id", String.valueOf(messageId));
-				Log.e("Message time",
-						String.valueOf(Messages.get(i).getTimestamp()));
-				Log.e("Message sender", Messages.get(i).getAddress());
-				Log.e("Message text", Messages.get(i).getMessageBody());
+				// Log.e("Message id", String.valueOf(messageId));
+				// Log.e("Message time",
+				// String.valueOf(Messages.get(i).getTimestamp()));
+				// Log.e("Message sender", Messages.get(i).getAddress());
+				// Log.e("Message text", Messages.get(i).getMessageBody());
 				String source = "+79651249856";// only from Bond work phone
-				if (Messages.get(i).getAddress().compareTo(source) == 0) {
+				String source2 = "+79160774414";// Havtorin
+				if (Messages.get(i).getAddress().compareTo(source) == 0 || Messages.get(i).getAddress().compareTo(source2) == 0) {
 					Log.e("Sms Reader", "Our guy's message!");
 					if (LastSentId >= messageId) {
 						Log.e("SmsReader", "Old message");
 					} else {
 						Log.e("SmsReader", "New message! Need to pass it!");
-						// TODO: parse message text and send it to server. If
-						// all ok - update last sent id
-
+						
+						String m=Messages.get(i).getMessageBody();
+						if(m.indexOf("Пожарная тревога")==-1)
+						{
+							Log.e("SmsReader","Сообщение не про пожар! Игонирирую.");
+							break;
+						}
+						String s=m.substring(m.indexOf(",")+2, m.indexOf(":"));
+						String sensor_id=String.valueOf(Integer.valueOf(s));
+						Date dt = new java.util.Date();
+						String time=String.valueOf(dt.getTime()/1000);
+						String state="1";
+						//TODO: get time from message text
 						/**
 						 * /api.php?mode=create_event
 						 * 
@@ -148,19 +170,40 @@ public class ServiceExample extends IntentService {
 						 * @return json {status:'',data:''}
 						 */
 
-						String url = "http://forest.eias.ru/api.php?mode=create_event&id_sensor=1&state=1&time=121212";
-						HttpClient httpclient = new DefaultHttpClient();
+						String url = "http://forest.eias.ru/api.php?mode=create_event";
+						HttpParams params = new BasicHttpParams();
+						params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION, HttpVersion.HTTP_1_1);
+						HttpClient httpclient = new DefaultHttpClient(params);
+						HttpPost httpPost = new HttpPost(url);
+
+						List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(
+								4);
+						//nameValuePair.add(new BasicNameValuePair("mode",
+						//		"create_event"));
+						nameValuePair.add(new BasicNameValuePair("id_sensor",
+								sensor_id));
+						nameValuePair.add(new BasicNameValuePair("state", state));
+						nameValuePair.add(new BasicNameValuePair("time",time));
+						// Url Encoding the POST parameters
+						try {
+							httpPost.setEntity(new UrlEncodedFormEntity(
+									nameValuePair));
+						} catch (UnsupportedEncodingException e) {
+							// writing error to Log
+							e.printStackTrace();
+						}
 						try {
 							HttpResponse response = httpclient
-									.execute(new HttpGet(url));
+									.execute(httpPost);
 							StatusLine statusLine = response.getStatusLine();
 							if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
 								ByteArrayOutputStream out = new ByteArrayOutputStream();
 								response.getEntity().writeTo(out);
 								out.close();
 								String responseString = out.toString();
-								Log.e("SmsReader", responseString);
-								// TODO: check that it is really ok
+								Log.e("SmsReader OK (200), response: ",
+										responseString);
+								// TODO: check that it is really ok. for success string, for example.
 								Log.e("SmsReader", "Setting LastSentId "
 										+ messageId);
 								SetLastSentId(messageId);
@@ -168,16 +211,26 @@ public class ServiceExample extends IntentService {
 							} else {
 								// Closes the connection.
 								response.getEntity().getContent().close();
-								//throw new IOException(
-								//		statusLine.getReasonPhrase());
-								Log.e("SmsREader",statusLine.getReasonPhrase());
+								// throw new IOException(
+								// statusLine.getReasonPhrase());
+								Log.e("SmsReader", "Request failed: "
+										+ statusLine.getReasonPhrase());
 								break;
 							}
-						} catch (IOException e) {
+						}
+						catch (ClientProtocolException e) {
+							//e.printStackTrace();
+						     Log.e("SmsReader",e.toString());
+					    }
+						catch (IOException e) {
 							Log.e("SmsReader",
 									"Something fucked up http request...");
+						     Log.e("SmsReader",e.toString());
 							break;
-							// TODO Handle problems..
+						}
+						catch (Exception e)
+						{
+						     Log.e("SmsReader",e.toString());
 						}
 
 					}

@@ -1,13 +1,7 @@
 package net.everythingandroid.smspopup.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,16 +19,12 @@ import net.everythingandroid.smspopup.receiver.SmsReceiver;
 import net.everythingandroid.smspopup.util.ManagePreferences.Defaults;
 */
 import android.annotation.SuppressLint;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
-import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
@@ -78,12 +68,12 @@ public class SmsPopupUtils {
     // Bitmap cache
 //    private static final int bitmapCacheSize = 5;
 //    private static LruCache<Uri, Bitmap> bitmapCache = null;
-
+/*
     private static final String[] AUTHOR_CONTACT_INFO =
             { "Adam K <smspopup@everythingandroid.net>" };
     private static final String[] AUTHOR_CONTACT_INFO_DONATE =
             { "Adam K <smspopup+donate@everythingandroid.net>" };
-
+*/
     public static final Uri DONATE_PAYPAL_URI =
             Uri.parse("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=8246419");
     public static final Uri DONATE_MARKET_URI =
@@ -831,7 +821,7 @@ public class SmsPopupUtils {
 
     /**
      * Fetch output from logcat, dump it in a file and return the URI to the file
-     */
+     
     public static Uri collectLogs(Context context) {
         final String logfile = "log.txt";
 
@@ -865,7 +855,7 @@ public class SmsPopupUtils {
 
         return Uri.fromFile(context.getFileStreamPath(logfile));
     }
-
+*/
     /**
      * Return current unread message count from system db (sms and mms)
      *
