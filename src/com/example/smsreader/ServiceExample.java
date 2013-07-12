@@ -153,8 +153,9 @@ public class ServiceExample extends IntentService {
 						if(m.indexOf("Пожарная тревога")==-1)
 						{
 							Log.e("SmsReader","Сообщение не про пожар! Игонирирую.");
-							break;
+							continue;
 						}
+
 						String s=m.substring(m.indexOf(",")+2, m.indexOf(":"));
 						String sensor_id=s.trim();//String.valueOf(Integer.valueOf(s));
 						Date dt = new java.util.Date();

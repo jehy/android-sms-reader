@@ -47,10 +47,11 @@ public class MainActivity extends Activity {
 			Log.v("SmsInformer", "Starting service");
 			// startService(inetnt);
 			Calendar cal = Calendar.getInstance();
-			// Start every 30 seconds
-			alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-					600 * 1000, pintent);
+			// Start every 60 seconds
 
+			alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
+					60 * 1000, pintent);
+			
 		} else {
 			// inetnt=new Intent(this,ServiceExample.class);
 			Log.v("SmsInformer", "Stopping service");
