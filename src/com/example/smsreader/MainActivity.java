@@ -49,7 +49,7 @@ public class MainActivity extends Activity {
 			Calendar cal = Calendar.getInstance();
 			// Start every 30 seconds
 			alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
-					40 * 1000, pintent);
+					600 * 1000, pintent);
 
 		} else {
 			// inetnt=new Intent(this,ServiceExample.class);

@@ -115,7 +115,7 @@ public class ServiceExample extends IntentService {
 			// boolean s = ReadMessages();
 			long LastSentId = GetLastSentId();
 			ArrayList<SmsMmsMessage> Messages = SmsPopupUtils.getMessages(
-					serviceContext, 1);
+					serviceContext, 3);
 			long LastSmsId = Messages.get(0).getMessageId();
 
 			Log.e("SmsReader", "Last received message ID is " + LastSmsId);
@@ -156,7 +156,7 @@ public class ServiceExample extends IntentService {
 							break;
 						}
 						String s=m.substring(m.indexOf(",")+2, m.indexOf(":"));
-						String sensor_id=String.valueOf(Integer.valueOf(s));
+						String sensor_id=s.trim();//String.valueOf(Integer.valueOf(s));
 						Date dt = new java.util.Date();
 						String time=String.valueOf(dt.getTime()/1000);
 						String state="1";
@@ -237,6 +237,11 @@ public class ServiceExample extends IntentService {
 				}
 			}
 		}
+	}
+	
+	void processMessage(String text, String from)
+	{
+		
 	}
 
 	long GetLastSentId() {
