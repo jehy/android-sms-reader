@@ -1,27 +1,6 @@
 package com.sma.smsreader;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.HttpVersion;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.CoreProtocolPNames;
-import org.apache.http.params.HttpParams;
-
 import net.everythingandroid.smspopup.provider.SmsMmsMessage;
 import net.everythingandroid.smspopup.util.SmsPopupUtils;
 
@@ -162,107 +141,58 @@ public class ServiceExample extends IntentService {
 						found = true;
 				}
 
-				if (found == true) {
-					Log.e("Sms Reader", "Our guy's message!");
-					if (LastSentAlarmId >= messageId) {
-						Log.e("SmsReader", "Old message");
-					} else {
-						Log.e("SmsReader", "New message! Need to pass it!");
+				if (!found)
+					continue;// not our guy
 
-						String m = Messages.get(i).getMessageBody();
-						if (m.indexOf("Пожарная тревога") != -1) {
-							boolean res = addSensor(m, messageId);
-							if (!res)
-								break;
-						} else {
+				Log.e("Sms Reader", "Our guy's message!");
+				String m = Messages.get(i).getMessageBody();
 
-							Log.e("SmsReader",
-									"Сообщение не про пожар! Игонирирую.");
-							continue;
-						}
+				if (m.indexOf("Пожарная тревога") == -1
+						|| LastSentAlarmId >= messageId) {
+					Log.e("SmsReader",
+							"Сообщение не про пожар или старое! Игнорирую.");
+					continue;
+				} else {
 
-					}
+					boolean res = setAlarm(m, messageId);
+					if (!res)
+						break;
+				}
+
+				if (m.indexOf("add_sensor") == -1
+						|| LastSetSensorId >= messageId) {
+					Log.e("SmsReader",
+							"Сообщение не про добавку сенсора или старое! Игнорирую.");
+					continue;
+				} else {
+
+					boolean res = addSensor(m, messageId);
+					if (!res)
+						break;
+
 				}
 			}
 		}
+
 	}
 
-	boolean addSensor(String m, long messageId) {
-
-		String s = m.substring(m.indexOf("тревога") + 7, m.indexOf(":"));
-		s = s.replace(",", "");
-		String sensor_id = s.trim().trim();// String.valueOf(Integer.valueOf(s));
-		Date dt = new java.util.Date();
-		String time = String.valueOf(dt.getTime() / 1000);
-		String state = "1";
-		// TODO: get time from message text
-		/**
-		 * /api.php?mode=create_event
-		 * 
-		 * @param id_sensor
-		 * @param state
-		 * @param time
-		 * @return json {status:'',data:''}
-		 */
-
-		String url = "http://forest.eias.ru/api.php?mode=create_event";
-		HttpParams params = new BasicHttpParams();
-		params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION,
-				HttpVersion.HTTP_1_1);
-		HttpClient httpclient = new DefaultHttpClient(params);
-		HttpPost httpPost = new HttpPost(url);
-
-		List<NameValuePair> nameValuePair = new ArrayList<NameValuePair>(4);
-		// nameValuePair.add(new BasicNameValuePair("mode",
-		// "create_event"));
-		nameValuePair.add(new BasicNameValuePair("id_sensor", sensor_id));
-		nameValuePair.add(new BasicNameValuePair("state", state));
-		nameValuePair.add(new BasicNameValuePair("time", time));
-		// Url Encoding the POST parameters
-		try {
-			httpPost.setEntity(new UrlEncodedFormEntity(nameValuePair));
-		} catch (UnsupportedEncodingException e) {
-			// writing error to Log
-			e.printStackTrace();
-		}
-		try {
-			HttpResponse response = httpclient.execute(httpPost);
-			StatusLine statusLine = response.getStatusLine();
-			if (statusLine.getStatusCode() == HttpStatus.SC_OK) {
-				ByteArrayOutputStream out = new ByteArrayOutputStream();
-				response.getEntity().writeTo(out);
-				out.close();
-				String responseString = out.toString();
-				Log.e("SmsReader OK (200), response: ", responseString);
-				// TODO: check that it is really ok. for success string, for
-				// example.
-				Log.e("SmsReader", "Setting LastSentId " + messageId);
-				SetLastSentAlarmId(messageId);
-				// ..more logic
-			} else {
-				// Closes the connection.
-				response.getEntity().getContent().close();
-				// throw new IOException(
-				// statusLine.getReasonPhrase());
-				Log.e("SmsReader",
-						"Request failed: " + statusLine.getReasonPhrase());
-				return false;
-			}
-		} catch (ClientProtocolException e) {
-			// e.printStackTrace();
-			Log.e("SmsReader", e.toString());
-		} catch (IOException e) {
-			Log.e("SmsReader", "Something fucked up http request...");
-			Log.e("SmsReader", e.toString());
-			return false;
-		} catch (Exception e) {
-			Log.e("SmsReader", e.toString());
-		}
-		return true;
+	private boolean addSensor(String json, long messageId) {
+		AddSensorMessage m = new AddSensorMessage();
+		m.set(json);
+		boolean r = m.send();
+		if (r)
+			this.SetLastSetSensorId(messageId);
+		return r;
 	}
 
-	void processMessage(String text, String from) {
+	boolean setAlarm(String json, long messageId) {
 
+		SetAlarmMessage m = new SetAlarmMessage();
+		m.set(json);
+		boolean r = m.send();
+		if (r)
+			this.SetLastSentAlarmId(messageId);
+		return r;
 	}
 
 	long GetLastSentAlarmId() {
