@@ -37,6 +37,13 @@ public class ServiceExample extends IntentService {
 
 	private static final String PREFS_NAME = "SmsReader";
 
+	String[] allowed = { "+79651249856",// Bond
+			"+79160774414",// Havtorin
+			"+79258790574",// sensor
+			"+79651802197",// sensor 1
+			"+79263860444",// vlad
+	};
+
 	public ServiceExample(String name) {
 		super(name);
 		Log.v("Service create", "creating service");
@@ -114,6 +121,7 @@ public class ServiceExample extends IntentService {
 			Log.v("Thread service", "Running service thread");
 			// boolean s = ReadMessages();
 			long LastSentAlarmId = GetLastSentAlarmId();
+			long LastSetSensorId = GetLastSetSensorId();
 			ArrayList<SmsMmsMessage> Messages = SmsPopupUtils.getMessages(
 					serviceContext, 3);
 			long LastSmsId = Messages.get(0).getMessageId();
@@ -122,28 +130,39 @@ public class ServiceExample extends IntentService {
 
 			if (LastSentAlarmId > LastSmsId) {
 				Log.e("SmsReader Error",
-						"SMS id was reset. Setting it to last message");
+						"SMS id was reset. Setting LastSentAlarmId to last message");
 				SetLastSentAlarmId(LastSmsId);
+			}
+
+			if (LastSetSensorId > LastSmsId) {
+				Log.e("SmsReader Error",
+						"SMS id was reset. Setting LastSetSensorId to last message");
+				SetLastSetSensorId(LastSmsId);
 			}
 			if (LastSmsId == 0) {
 				Log.e("SmsReader Error",
 						"LastSmsId was zero. Setting it to last message to avoid spam");
 				SetLastSentAlarmId(LastSmsId);
+				SetLastSetSensorId(LastSmsId);
 			}
 
 			for (int i = Messages.size() - 1; i >= 0; i--)// begin from the
 															// oldest
 			{
 				long messageId = Messages.get(i).getMessageId();
+				String from = Messages.get(i).getAddress();
 				// Log.e("Message id", String.valueOf(messageId));
 				// Log.e("Message time",
 				// String.valueOf(Messages.get(i).getTimestamp()));
 				// Log.e("Message sender", Messages.get(i).getAddress());
 				// Log.e("Message text", Messages.get(i).getMessageBody());
-				String source = "+79651249856";// only from Bond work phone
-				String source2 = "+79160774414";// Havtorin
-				if (Messages.get(i).getAddress().compareTo(source) == 0
-						|| Messages.get(i).getAddress().compareTo(source2) == 0) {
+				boolean found = false;
+				for (int z = 0; z < allowed.length; z++) {
+					if (allowed[z].compareTo(from) == 0)
+						found = true;
+				}
+
+				if (found == true) {
 					Log.e("Sms Reader", "Our guy's message!");
 					if (LastSentAlarmId >= messageId) {
 						Log.e("SmsReader", "Old message");
@@ -259,7 +278,6 @@ public class ServiceExample extends IntentService {
 		editor.putLong("LastSentAlarmId", d);
 		editor.commit();
 	}
-	
 
 	long GetLastSetSensorId() {
 		SharedPreferences settings = getApplicationContext()
