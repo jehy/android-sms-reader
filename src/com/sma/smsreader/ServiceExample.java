@@ -151,7 +151,7 @@ public class ServiceExample extends IntentService {
 						|| LastSentAlarmId >= messageId) {
 					Log.e("SmsReader",
 							"Сообщение не про пожар или старое! Игнорирую.");
-					continue;
+					//continue;
 				} else {
 
 					boolean res = setAlarm(m, messageId);
@@ -163,7 +163,7 @@ public class ServiceExample extends IntentService {
 						|| LastSetSensorId >= messageId) {
 					Log.e("SmsReader",
 							"Сообщение не про добавку сенсора или старое! Игнорирую.");
-					continue;
+					//continue;
 				} else {
 
 					boolean res = addSensor(m, messageId);
