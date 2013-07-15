@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.smsreader"
-    android:versionCode="2"
-    android:versionName="1.1" >
+    package="com.sma.smsreader"
+    android:versionCode="3"
+    android:versionName="1.2" >
 
     <uses-sdk
         android:minSdkVersion="10"
@@ -20,7 +20,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.example.smsreader.MainActivity"
+            android:name="com.sma.smsreader.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -29,12 +29,12 @@
             </intent-filter>
         </activity>
 <service android:enabled="true"
-  android:name=".ServiceExample"
+  android:name="com.sma.smsreader.ServiceExample"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
   >  
 </service>
-<receiver android:name=".SMSReceiver" android:enabled="true">
+<receiver android:name="com.sma.smsreader.SMSReceiver" android:enabled="true">
             <intent-filter>
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>

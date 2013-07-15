@@ -8,8 +8,8 @@ import java.util.regex.Pattern;
 import net.everythingandroid.smspopup.provider.SmsMmsMessage;
 import net.everythingandroid.smspopup.util.ManagePreferences.Defaults;
 
-import com.example.smsreader.BuildConfig;
-import com.example.smsreader.R;
+import com.sma.smsreader.BuildConfig;
+import com.sma.smsreader.R;
 /*
 import net.everythingandroid.smspopup.BuildConfig;
 import net.everythingandroid.smspopup.R;
