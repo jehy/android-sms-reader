@@ -26,11 +26,13 @@ import android.util.Log;
 
 public class SetAlarmMessage {
 
-	String time,state,sensor_id;
+	String time, state, sensor_id;
+
 	public void set(String json) {
 		// TODO Auto-generated method stub
 
-		String s = json.substring(json.indexOf("тревога") + 7, json.indexOf(":"));
+		String s = json.substring(json.indexOf("тревога") + 7,
+				json.indexOf(":"));
 		s = s.replace(",", "");
 		sensor_id = s.trim().trim();// String.valueOf(Integer.valueOf(s));
 		Date dt = new java.util.Date();

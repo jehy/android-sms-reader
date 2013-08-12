@@ -31,7 +31,6 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
-
 	public void ToggleService(View view) {
 
 		boolean on = ((ToggleButton) view).isChecked();
@@ -52,7 +51,7 @@ public class MainActivity extends Activity {
 
 			alarm.setRepeating(AlarmManager.RTC_WAKEUP, cal.getTimeInMillis(),
 					60 * 1000, pintent);
-			
+
 		} else {
 			// inetnt=new Intent(this,ServiceExample.class);
 			Log.v("SmsInformer", "Stopping service");

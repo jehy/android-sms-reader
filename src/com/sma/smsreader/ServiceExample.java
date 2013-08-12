@@ -100,7 +100,8 @@ public class ServiceExample extends IntentService {
 			Log.v("Thread service", "Running service thread");
 			// boolean s = ReadMessages();
 			long LastSentAlarmId = GetLastSentAlarmId();
-			long LastSetSensorId = GetLastSetSensorId();
+			long LastSentSensorId = GetLastSentSensorId();
+			long LastSentProblemId = GetLastSentProblemId();
 			ArrayList<SmsMmsMessage> Messages = SmsPopupUtils.getMessages(
 					serviceContext, 3);
 			long LastSmsId = Messages.get(0).getMessageId();
@@ -113,16 +114,23 @@ public class ServiceExample extends IntentService {
 				SetLastSentAlarmId(LastSmsId);
 			}
 
-			if (LastSetSensorId > LastSmsId) {
+			if (LastSentSensorId > LastSmsId) {
 				Log.e("SmsReader Error",
 						"SMS id was reset. Setting LastSetSensorId to last message");
-				SetLastSetSensorId(LastSmsId);
+				SetLastSentSensorId(LastSmsId);
+			}
+
+			if (LastSentProblemId > LastSmsId) {
+				Log.e("SmsReader Error",
+						"SMS id was reset. Setting LastSentProblemId to last message");
+				SetLastSentProblemId(LastSmsId);
 			}
 			if (LastSmsId == 0) {
 				Log.e("SmsReader Error",
 						"LastSmsId was zero. Setting it to last message to avoid spam");
 				SetLastSentAlarmId(LastSmsId);
-				SetLastSetSensorId(LastSmsId);
+				SetLastSentSensorId(LastSmsId);
+				SetLastSentProblemId(LastSmsId);
 			}
 
 			for (int i = Messages.size() - 1; i >= 0; i--)// begin from the
@@ -151,7 +159,7 @@ public class ServiceExample extends IntentService {
 						|| LastSentAlarmId >= messageId) {
 					Log.e("SmsReader",
 							"Сообщение не про пожар или старое! Игнорирую.");
-					//continue;
+					// continue;
 				} else {
 
 					boolean res = setAlarm(m, messageId);
@@ -160,13 +168,26 @@ public class ServiceExample extends IntentService {
 				}
 
 				if (m.indexOf("add_sensor") == -1
-						|| LastSetSensorId >= messageId) {
+						|| LastSentSensorId >= messageId) {
 					Log.e("SmsReader",
 							"Сообщение не про добавку сенсора или старое! Игнорирую.");
-					//continue;
+					// continue;
 				} else {
 
 					boolean res = addSensor(m, messageId);
+					if (!res)
+						break;
+
+				}
+
+				if (m.indexOf("add_problem") == -1
+						|| LastSentProblemId >= messageId) {
+					Log.e("SmsReader",
+							"Сообщение не про добавку мусора или старое! Игнорирую.");
+					// continue;
+				} else {
+
+					boolean res = addProblem(m, messageId);
 					if (!res)
 						break;
 
@@ -181,7 +202,16 @@ public class ServiceExample extends IntentService {
 		m.set(json);
 		boolean r = m.send();
 		if (r)
-			this.SetLastSetSensorId(messageId);
+			this.SetLastSentSensorId(messageId);
+		return r;
+	}
+
+	private boolean addProblem(String json, long messageId) {
+		AddProblemMessage m = new AddProblemMessage();
+		m.set(json);
+		boolean r = m.send();
+		if (r)
+			this.SetLastSentProblemId(messageId);
 		return r;
 	}
 
@@ -209,13 +239,27 @@ public class ServiceExample extends IntentService {
 		editor.commit();
 	}
 
-	long GetLastSetSensorId() {
+	long GetLastSentProblemId() {
+		SharedPreferences settings = getApplicationContext()
+				.getSharedPreferences(PREFS_NAME, 0);
+		return settings.getLong("LastSentProblemId", 0);
+	}
+
+	void SetLastSentProblemId(long d) {
+		SharedPreferences settings = getApplicationContext()
+				.getSharedPreferences(PREFS_NAME, 0);
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putLong("LastSentProblemId", d);
+		editor.commit();
+	}
+
+	long GetLastSentSensorId() {
 		SharedPreferences settings = getApplicationContext()
 				.getSharedPreferences(PREFS_NAME, 0);
 		return settings.getLong("LastSetSensorId", 0);
 	}
 
-	void SetLastSetSensorId(long d) {
+	void SetLastSentSensorId(long d) {
 		SharedPreferences settings = getApplicationContext()
 				.getSharedPreferences(PREFS_NAME, 0);
 		SharedPreferences.Editor editor = settings.edit();

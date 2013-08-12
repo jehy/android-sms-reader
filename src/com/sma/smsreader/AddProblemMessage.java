@@ -25,7 +25,7 @@ import org.json.JSONObject;
 
 import android.util.Log;
 
-public class AddSensorMessage {
+public class AddProblemMessage {
 	String id, name, latitude, longitude, altitude, setup_time, comments,
 			re_id, host_id;
 
@@ -35,9 +35,6 @@ public class AddSensorMessage {
 		this.comments = "";
 		try {
 			JSONObject jObject = new JSONObject(json);
-			this.id = jObject.getString("sensor_id");
-			this.re_id = jObject.getString("retr_id");
-			this.host_id = jObject.getString("host_id");
 			this.setup_time = jObject.getString("time");
 			this.longitude = jObject.getString("long");
 			this.latitude = jObject.getString("lat");
@@ -53,21 +50,19 @@ public class AddSensorMessage {
 	public boolean send() {
 
 		/**
-		 * /api.php?mode=create_sensor
+		 * /api.php?mode=create_problem
 		 * 
-		 * @param id
 		 * @param name
-		 * @param latitude
+		 * @param altitude
 		 * @param longitude
-		 * @param atitude
+		 * @param latitude
 		 * @param setup_time
 		 * @param comments
-		 * @param re_id
-		 * @param host_id
+		 * @param type
 		 * @return json {status:'',data:''}
 		 */
 
-		String url = "http://forest.eias.ru/api.php?mode=create_sensor";
+		String url = "http://forest.eias.ru/api.php?mode=create_problem";
 		HttpParams params = new BasicHttpParams();
 		params.setParameter(CoreProtocolPNames.PROTOCOL_VERSION,
 				HttpVersion.HTTP_1_1);
@@ -85,8 +80,6 @@ public class AddSensorMessage {
 		nameValuePair
 				.add(new BasicNameValuePair("setup_time", this.setup_time));
 		nameValuePair.add(new BasicNameValuePair("comments", this.comments));
-		nameValuePair.add(new BasicNameValuePair("re_id", this.re_id));
-		nameValuePair.add(new BasicNameValuePair("host_id", this.host_id));
 		// Url Encoding the POST parameters
 		try {
 			httpPost.setEntity(new UrlEncodedFormEntity(nameValuePair));
