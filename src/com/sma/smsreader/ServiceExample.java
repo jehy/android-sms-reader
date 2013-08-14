@@ -102,8 +102,20 @@ public class ServiceExample extends IntentService {
 			long LastSentAlarmId = GetLastSentAlarmId();
 			long LastSentSensorId = GetLastSentSensorId();
 			long LastSentProblemId = GetLastSentProblemId();
-			ArrayList<SmsMmsMessage> Messages = SmsPopupUtils.getMessages(
+			ArrayList<SmsMmsMessage> Messages;
+
+			try
+			{
+				Messages = SmsPopupUtils.getMessages(
 					serviceContext, 3);
+			}
+			catch (Exception e)
+			{
+				Log.e("SmsReader Error",
+						"Could not get messages. No SMS?");
+				return;
+				
+			}
 			long LastSmsId = Messages.get(0).getMessageId();
 
 			Log.e("SmsReader", "Last received message ID is " + LastSmsId);
